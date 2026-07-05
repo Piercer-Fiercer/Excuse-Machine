@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Excuse Machine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #E8DFC8;
+    --paper-dark: #D9CBA3;
+    --ink: #1F2D3D;
+    --stamp-red: #B23A2E;
+    --stamp-teal: #3D6B63;
+    --shadow: rgba(31,45,61,0.25);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #4a4536;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.03) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(0,0,0,0.15) 0%, transparent 50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    font-family: 'Courier Prime', monospace;
+  }
+
+  .permit {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    background: var(--paper);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(31,45,61,0.02) 0px, transparent 1px, transparent 2px),
+      radial-gradient(ellipse at top left, rgba(255,255,255,0.15), transparent 60%);
+    border: 2px solid var(--ink);
+    box-shadow: 0 20px 50px var(--shadow), inset 0 0 0 6px var(--paper-dark), inset 0 0 0 7px var(--ink);
+    padding: 36px 32px 32px;
+  }
+
+  .permit::before {
+    content: "";
+    position: absolute;
+    inset: 12px;
+    border: 1px dashed rgba(31,45,61,0.35);
+    pointer-events: none;
+  }
+
+  .letterhead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+  }
+
+  .letterhead .agency {
+    font-family: 'Courier Prime', monospace;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  .letterhead .agency span {
+    display: block;
+    font-weight: 400;
+    font-size: 9px;
+    opacity: 0.65;
+  }
+
+  .form-number {
+    font-size: 10px;
+    text-align: right;
+    color: var(--ink);
+    opacity: 0.7;
+    line-height: 1.5;
+  }
+
+  h1 {
+    font-family: 'Special Elite', cursive;
+    font-size: 26px;
+    text-align: center;
+    color: var(--ink);
+    margin: 0 0 4px;
+    letter-spacing: 0.02em;
+  }
+
+  .subhead {
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink);
+    opacity: 0.7;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  select {
+    width: 100%;
+    font-family: 'Courier Prime', monospace;
+    font-size: 14px;
+    padding: 8px 10px;
+    background: rgba(255,255,255,0.5);
+    border: none;
+    border-bottom: 2px solid var(--ink);
+    color: var(--ink);
+    appearance: none;
+    cursor: pointer;
+  }
+  select:focus-visible {
+    outline: 3px solid var(--stamp-teal);
+    outline-offset: 2px;
+  }
+
+  .output-line {
+    min-height: 100px;
+    border: 1px solid rgba(31,45,61,0.4);
+    background: rgba(255,255,255,0.35);
+    padding: 16px;
+    margin: 20px 0 24px;
+    font-family: 'Special Elite', cursive;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink);
+    position: relative;
+  }
+
+  .output-line .placeholder {
+    opacity: 0.4;
+    font-style: italic;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background: var(--ink);
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 0.9s steps(1) infinite;
+  }
+  .cursor.hidden { display: none; }
+
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .copy-btn {
+    font-family: 'Courier Prime', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: transparent;
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    padding: 12px 22px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.08s ease;
+  }
+
+  .copy-btn:hover { background: var(--ink); color: var(--paper); }
+  .copy-btn:active { transform: translateY(2px); }
+  .copy-btn:disabled { opacity: 0.5; cursor: default; background: transparent; color: var(--ink); }
+
+  .copy-btn:focus-visible {
+    outline: 3px solid var(--stamp-teal);
+    outline-offset: 3px;
+  }
+
+  .stamp-btn {
+    position: relative;
+    font-family: 'Courier Prime', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--stamp-red);
+    border: none;
+    border-radius: 4px;
+    padding: 14px 28px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #7a241c, 0 8px 14px rgba(0,0,0,0.3);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+
+  .stamp-btn:active {
+    transform: translateY(6px);
+    box-shadow: 0 0 0 #7a241c, 0 2px 6px rgba(0,0,0,0.3);
+  }
+
+  .stamp-btn:focus-visible {
+    outline: 3px solid var(--stamp-teal);
+    outline-offset: 3px;
+  }
+
+  .stamp-mark {
+    position: absolute;
+    top: 44%;
+    right: 8%;
+    width: 130px;
+    height: 130px;
+    border: 5px solid var(--stamp-red);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--stamp-red);
+    font-family: 'Special Elite', cursive;
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+    transform: translateY(-50%) rotate(-16deg) scale(0);
+    opacity: 0;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+
+  .stamp-mark.slam {
+    animation: slam 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+  }
+
+  @keyframes slam {
+    0%   { transform: translateY(-90%) rotate(-16deg) scale(2.4); opacity: 0; }
+    55%  { transform: translateY(-45%) rotate(-16deg) scale(0.9); opacity: 0.9; }
+    75%  { transform: translateY(-52%) rotate(-16deg) scale(1.05); opacity: 0.85; }
+    100% { transform: translateY(-50%) rotate(-16deg) scale(1); opacity: 0.85; }
+  }
+
+  .footer-note {
+    margin-top: 22px;
+    font-size: 9px;
+    text-align: center;
+    color: var(--ink);
+    opacity: 0.55;
+    letter-spacing: 0.05em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stamp-mark.slam { animation: none; opacity: 0.85; transform: translateY(-50%) rotate(-16deg) scale(1); }
+    .cursor { animation: none; }
+  }
+
+  @media (max-width: 480px) {
+    .permit { padding: 28px 20px 24px; }
+    .stamp-mark { width: 100px; height: 100px; font-size: 14px; right: 4%; }
+    h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="permit">
+  <div class="letterhead">
+    <div class="agency">Bureau of Plausible Deniability<span>Interdepartmental Excuse Division</span></div>
+    <div class="form-number">FORM 27-B<br>REV. 2026</div>
+  </div>
+
+  <h1>Certificate of Excuse</h1>
+  <div class="subhead">Official grounds for your absence, tardiness, or silence</div>
+
+  <div class="field">
+    <label for="category">Excuse required for</label>
+    <select id="category">
+      <option value="late">Being late</option>
+      <option value="missing">Missing an event</option>
+      <option value="work">Unfinished work</option>
+      <option value="reply">Not replying to a message</option>
+      <option value="school">Missing homework</option>
+      <option value="gaming">Declining a game invite</option>
+    </select>
+  </div>
+
+  <div class="output-line" id="output" aria-live="polite">
+    <span class="placeholder" id="placeholder">Select a category and press ISSUE EXCUSE.</span>
+  </div>
+
+  <div class="actions">
+    <button class="stamp-btn" id="generateBtn">Issue Excuse</button>
+    <button class="copy-btn" id="copyBtn" disabled aria-live="polite">Copy Excuse</button>
+  </div>
+
+  <div class="stamp-mark" id="stampMark">Excuse<br>Approved</div>
+
+  <div class="footer-note">This certificate is legally meaningless in all 50 states.</div>
+</div>
+
+<script>
+  const excuses = {
+    late: [
+      "I was delayed by a municipal pigeon dispute that required my testimony as a witness.",
+      "My car's GPS insisted on the scenic route through a parallel dimension.",
+      "I had to wait for a very slow-moving ceremony involving a neighbor's garden gnome.",
+      "A vending machine owed me $1.25 and I was not leaving without it.",
+      "I got into a lengthy staring contest with a cat and lost track of time.",
+      "The elevator and I had a philosophical disagreement about which floor was real.",
+      "I was recalibrating my sense of time using only a sundial.",
+      "There was an unscheduled parade and I am, legally, required to watch all parades."
+    ],
+    missing: [
+      "I was subpoenaed by a group of geese and could not leave the premises.",
+      "My houseplant had an emergency and I am its only listed contact.",
+      "I got locked in a conversation with someone about their dream from 2019.",
+      "A single sock disappeared and the search took priority over all other plans.",
+      "I was chosen at random to test how long a candle can burn unattended.",
+      "My reflection and I had a scheduling conflict.",
+      "I was practicing my signature for an autograph I do not yet need.",
+      "The couch achieved a gravitational pull I could not escape."
+    ],
+    work: [
+      "The document reached a philosophical conclusion I was not prepared to argue with.",
+      "My keyboard went on a brief but principled strike.",
+      "I was waiting for a sign from the universe, and Wi-Fi, in that order.",
+      "The spreadsheet developed sentience and requested a day off.",
+      "I have been redistributing my attention across several imaginary emergencies.",
+      "A single formatting error required a full geological-time-scale investigation.",
+      "My draft is currently in a witness protection program.",
+      "I was overruled by a more urgent nap."
+    ],
+    reply: [
+      "Your message is currently being reviewed by a committee of one very tired person.",
+      "I was composing a reply so perfect it required several unrelated naps.",
+      "My phone entered a silent standoff with my will to communicate.",
+      "I read it, nodded, and then time simply continued without my input.",
+      "I was saving your message for a moment of appropriate emotional readiness, which has not yet arrived.",
+      "A typo in my draft demanded a full rewrite of my personality.",
+      "I have been in a prolonged negotiation with my own procrastination.",
+      "Your message is safe. It is simply on an indefinite scenic route to my thumbs."
+    ],
+    school: [
+      "My homework achieved consciousness overnight and refused to be submitted.",
+      "I was consulted by the school library on a matter of great architectural importance.",
+      "A pencil rolled under my desk and the retrieval effort consumed the entire evening.",
+      "My assignment is currently on a personal journey of self-discovery inside my backpack.",
+      "I was appointed, without my consent, to mediate a dispute between two erasers.",
+      "The printer and I had irreconcilable differences regarding the meaning of 'ready'.",
+      "I dedicated the evening to a thorough audit of my pencil case's contents.",
+      "My notes were last seen migrating to a folder even I cannot locate."
+    ],
+    gaming: [
+      "I have foreseen, through means I cannot disclose, that tonight's match ends in a wipe.",
+      "My controller has entered a state of protest and will not be reasoned with.",
+      "I am observing a personal moratorium on queueing until my luck improves.",
+      "A prior engagement with my own couch takes precedence this evening.",
+      "I have reached my recommended daily allowance of shouting at a screen.",
+      "My in-game avatar and I are on a scheduled hiatus from each other.",
+      "I am conserving my energy for a rematch of great and undetermined importance.",
+      "The server and I have an understanding: tonight is not the night."
+    ]
+  };
+
+  const outputEl = document.getElementById('output');
+  const btn = document.getElementById('generateBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const stampMark = document.getElementById('stampMark');
+  const categorySelect = document.getElementById('category');
+
+  let typingTimer = null;
+  let currentExcuse = '';
+  let lastExcuseByCategory = {};
+
+  function pickExcuse(category) {
+    const list = excuses[category];
+    if (list.length === 1) return list[0];
+
+    let choice;
+    do {
+      choice = list[Math.floor(Math.random() * list.length)];
+    } while (choice === lastExcuseByCategory[category]);
+
+    lastExcuseByCategory[category] = choice;
+    return choice;
+  }
+
+  function typeText(text) {
+    if (typingTimer) clearInterval(typingTimer);
+    outputEl.innerHTML = '<span id="typed"></span><span class="cursor" id="cursor"></span>';
+    const typedEl = document.getElementById('typed');
+    const cursorEl = document.getElementById('cursor');
+    let i = 0;
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      typedEl.textContent = text;
+      cursorEl.classList.add('hidden');
+      return;
+    }
+
+    typingTimer = setInterval(() => {
+      typedEl.textContent += text[i];
+      i++;
+      if (i >= text.length) {
+        clearInterval(typingTimer);
+        cursorEl.classList.add('hidden');
+      }
+    }, 22);
+  }
+
+  function issueExcuse() {
+    const category = categorySelect.value;
+    const excuse = pickExcuse(category);
+    currentExcuse = excuse;
+
+    stampMark.classList.remove('slam');
+    void stampMark.offsetWidth; // restart animation
+    stampMark.classList.add('slam');
+
+    typeText(excuse);
+
+    copyBtn.disabled = false;
+    copyBtn.textContent = 'Copy Excuse';
+  }
+
+  function fallbackCopy(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.top = '-9999px';
+    textarea.style.left = '-9999px';
+    textarea.style.fontSize = '16px'; // prevents iOS Safari auto-zoom on focus
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    let success = false;
+    try {
+      success = document.execCommand('copy');
+    } catch (err) {
+      success = false;
+    }
+    document.body.removeChild(textarea);
+    return success;
+  }
+
+  function copyExcuse() {
+    if (!currentExcuse) return;
+
+    const showResult = (ok) => {
+      copyBtn.textContent = ok ? 'Copied!' : 'Couldn\u2019t copy \u2014 select manually';
+      setTimeout(() => { copyBtn.textContent = 'Copy Excuse'; }, 1800);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
+      navigator.clipboard.writeText(currentExcuse)
+        .then(() => showResult(true))
+        .catch(() => showResult(fallbackCopy(currentExcuse)));
+    } else {
+      showResult(fallbackCopy(currentExcuse));
+    }
+  }
+
+  btn.addEventListener('click', issueExcuse);
+  copyBtn.addEventListener('click', copyExcuse);
+</script>
+
+</body>
+</html>
