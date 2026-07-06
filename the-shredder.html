@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Shredder — A Bureau Disposal Unit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #E8DFC8;
+    --paper-dark: #D9CBA3;
+    --ink: #1F2D3D;
+    --stamp-red: #B23A2E;
+    --stamp-teal: #3D6B63;
+    --shadow: rgba(31,45,61,0.25);
+  }
+
+  * { box-sizing: border-box; }
+
+  .bureau-return {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 50;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--stamp-teal);
+    color: var(--paper);
+    text-decoration: none;
+    font-family: 'Courier Prime', monospace;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    border-radius: 3px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: transform 0.1s ease, opacity 0.1s ease;
+  }
+
+  .bureau-return:hover,
+  .bureau-return:focus-visible {
+    transform: translateY(-1px);
+    opacity: 0.92;
+  }
+
+  .bureau-return:focus-visible {
+    outline: 2px solid var(--paper);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 480px) {
+    .bureau-return {
+      top: 10px;
+      left: 10px;
+      font-size: 9px;
+      padding: 7px 10px;
+    }
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #4a4536;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.03) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(0,0,0,0.15) 0%, transparent 50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    font-family: 'Courier Prime', monospace;
+    overflow: hidden;
+  }
+
+  .desk {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    background: var(--paper);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(31,45,61,0.02) 0px, transparent 1px, transparent 2px),
+      radial-gradient(ellipse at top left, rgba(255,255,255,0.15), transparent 60%);
+    border: 2px solid var(--ink);
+    box-shadow: 0 20px 50px var(--shadow), inset 0 0 0 6px var(--paper-dark), inset 0 0 0 7px var(--ink);
+    padding: 30px 28px 32px;
+  }
+
+  .letterhead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+
+  .letterhead .agency {
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  .letterhead .agency span {
+    display: block;
+    font-weight: 400;
+    font-size: 9px;
+    opacity: 0.65;
+  }
+
+  .form-number {
+    font-size: 10px;
+    text-align: right;
+    color: var(--ink);
+    opacity: 0.7;
+    line-height: 1.5;
+  }
+
+  h1 {
+    font-family: 'Special Elite', cursive;
+    font-size: 24px;
+    text-align: center;
+    color: var(--ink);
+    margin: 0 0 4px;
+  }
+
+  .subhead {
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink);
+    opacity: 0.7;
+    margin-bottom: 18px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .quota-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    background: rgba(255,255,255,0.4);
+    border: 1px solid rgba(31,45,61,0.3);
+    padding: 10px 14px;
+    margin-bottom: 18px;
+  }
+
+  .quota-bar .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+  }
+
+  .quota-bar .count {
+    font-family: 'Special Elite', cursive;
+    font-size: 22px;
+    color: var(--ink);
+  }
+
+  .streak-msg {
+    text-align: center;
+    font-size: 11px;
+    color: var(--stamp-teal);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    height: 16px;
+    margin-bottom: 6px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .streak-msg.show { opacity: 1; }
+
+  .machine {
+    position: relative;
+    height: 300px;
+    margin-bottom: 20px;
+  }
+
+  .doc-zone {
+    position: relative;
+    height: 130px;
+  }
+
+  .doc {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fdfaf0;
+    border: 1px solid rgba(31,45,61,0.5);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+    text-align: center;
+    overflow: hidden;
+    transform-origin: top center;
+  }
+
+  .doc.size-small {
+    width: 52%;
+    max-width: 190px;
+    padding: 11px 10px;
+  }
+
+  .doc.size-regular {
+    width: 74%;
+    max-width: 280px;
+    padding: 16px 14px;
+  }
+
+  .doc.size-large {
+    width: 92%;
+    max-width: 340px;
+    padding: 20px 16px;
+  }
+
+  .doc.size-small .doc-title { font-size: 11px; }
+  .doc.size-regular .doc-title { font-size: 13px; }
+  .doc.size-large .doc-title { font-size: 14px; }
+
+  .doc.current {
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .doc.current.dragging {
+    cursor: grabbing;
+    box-shadow: 0 12px 22px rgba(0,0,0,0.3);
+  }
+
+  .doc .doc-title {
+    font-family: 'Special Elite', cursive;
+    font-size: 13px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .doc .doc-sub {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    opacity: 0.55;
+  }
+
+  .doc.stack-2 { top: -4px; transform: translateX(calc(-50% + 6px)) rotate(2deg); opacity: 0.7; z-index: 1; }
+  .doc.stack-3 { top: -8px; transform: translateX(calc(-50% - 6px)) rotate(-2deg); opacity: 0.45; z-index: 0; }
+  .doc.current { z-index: 2; }
+
+  .doc.consuming {
+    pointer-events: none;
+  }
+
+  .shredder-unit {
+    position: relative;
+    height: 26px;
+    margin: 4px auto 0;
+    width: 88%;
+    background: linear-gradient(180deg, #2b2118, #1a130d);
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  }
+
+  .shredder-unit .slot {
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    height: 4px;
+    background: #000;
+    transform: translateY(-50%);
+    border-radius: 2px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+  }
+
+  .bin {
+    position: relative;
+    height: 120px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+
+  .strip {
+    position: absolute;
+    bottom: 0;
+    width: 6px;
+    background: #fdfaf0;
+    border: 1px solid rgba(31,45,61,0.4);
+    opacity: 0;
+    transform: translateY(-40px) rotate(0deg);
+    transition: transform 0.5s cubic-bezier(0.4, 0.4, 0.3, 1), opacity 0.15s ease;
+  }
+
+  .strip.fall {
+    opacity: 0.95;
+  }
+
+  .strip.settled {
+    transition: opacity 0.6s ease 3s;
+    opacity: 0;
+  }
+
+  .feed-btn {
+    display: block;
+    width: 100%;
+    font-family: 'Courier Prime', monospace;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--stamp-red);
+    border: none;
+    border-radius: 6px;
+    padding: 18px 20px;
+    cursor: pointer;
+    box-shadow: 0 8px 0 #7a241c, 0 10px 16px rgba(0,0,0,0.3);
+    transition: transform 0.06s ease, box-shadow 0.06s ease;
+    user-select: none;
+  }
+
+  .feed-btn:active {
+    transform: translateY(8px);
+    box-shadow: 0 0 0 #7a241c, 0 2px 6px rgba(0,0,0,0.3);
+  }
+
+  .feed-btn:focus-visible {
+    outline: 3px solid var(--stamp-teal);
+    outline-offset: 3px;
+  }
+
+  .desk.shake {
+    animation: shake 0.16s ease;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-2px, 1px); }
+    50% { transform: translate(2px, -1px); }
+    75% { transform: translate(-1px, 1px); }
+  }
+
+  .footer-note {
+    margin-top: 20px;
+    font-size: 9px;
+    text-align: center;
+    color: var(--ink);
+    opacity: 0.55;
+    letter-spacing: 0.05em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .desk.shake { animation: none; }
+    .doc.consuming { transition: opacity 0.2s ease !important; }
+    .strip { transition: opacity 0.15s ease; }
+  }
+
+  @media (max-width: 480px) {
+    .desk { padding: 24px 18px 26px; }
+    .machine { height: 270px; }
+  }
+</style>
+</head>
+<body>
+
+<a class="bureau-return" href="index.html">← The Bureau</a>
+
+<div class="desk" id="desk">
+  <div class="letterhead">
+    <div class="agency">Bureau of Plausible Deniability<span>Document Disposal Division</span></div>
+    <div class="form-number">FORM 13-X<br>DISPOSAL LOG</div>
+  </div>
+
+  <h1>The Shredder</h1>
+  <div class="subhead">Drag a document into the slot, or press the button.</div>
+
+  <div class="quota-bar">
+    <div>
+      <div class="label">Documents shredded today</div>
+      <div class="count" id="countEl">0</div>
+    </div>
+  </div>
+
+  <div class="streak-msg" id="streakMsg"></div>
+
+  <div class="machine">
+    <div class="doc-zone" id="docZone"></div>
+    <div class="shredder-unit"><div class="slot"></div></div>
+    <div class="bin" id="bin"></div>
+  </div>
+
+  <button class="feed-btn" id="feedBtn">Feed It</button>
+
+  <div class="footer-note">Shredded material is not reviewed, recovered, or missed.</div>
+</div>
+
+<script>
+  const docTitles = [
+    "Form 12-C — Request for Nothing",
+    "Certificate of Silence",
+    "Memo: Re: The Other Memo",
+    "Notice of Continued Existence",
+    "Form 4B — Statement of Intent to Comply",
+    "Requisition for One (1) Paperclip",
+    "Interdepartmental Shrug, Filed in Triplicate",
+    "Form 91 — Acknowledgment of Acknowledgment",
+    "Notice of Indefinite Postponement",
+    "Certificate of Having Waited",
+    "Form 3-Q — Nothing to Report",
+    "Bureau Standard Form, Purpose Unknown"
+  ];
+
+  const docZone = document.getElementById('docZone');
+  const bin = document.getElementById('bin');
+  const feedBtn = document.getElementById('feedBtn');
+  const countEl = document.getElementById('countEl');
+  const streakMsg = document.getElementById('streakMsg');
+  const deskEl = document.getElementById('desk');
+
+  let count = 0;
+  let streakTimer = null;
+  let isBusy = false;
+  const MAX_STRIPS = 40;
+  const DRAG_THRESHOLD = 85;
+
+  const sizes = [
+    { name: 'small', weight: 3 },
+    { name: 'regular', weight: 5 },
+    { name: 'large', weight: 2 }
+  ];
+
+  function randomTitle() {
+    return docTitles[Math.floor(Math.random() * docTitles.length)];
+  }
+
+  function randomSize() {
+    const total = sizes.reduce((sum, s) => sum + s.weight, 0);
+    let roll = Math.random() * total;
+    for (const s of sizes) {
+      if (roll < s.weight) return s.name;
+      roll -= s.weight;
+    }
+    return 'regular';
+  }
+
+  function makeDoc(stackClass, isCurrent) {
+    const doc = document.createElement('div');
+    const size = randomSize();
+    doc.dataset.size = size;
+    doc.className = 'doc size-' + size + (stackClass ? ' ' + stackClass : '') + (isCurrent ? ' current' : '');
+    doc.innerHTML = `
+      <div class="doc-title">${randomTitle()}</div>
+      <div class="doc-sub">Pending Disposal</div>
+    `;
+    if (isCurrent) attachDragHandlers(doc);
+    return doc;
+  }
+
+  function initPile() {
+    docZone.innerHTML = '';
+    docZone.appendChild(makeDoc('stack-3', false));
+    docZone.appendChild(makeDoc('stack-2', false));
+    docZone.appendChild(makeDoc('', true));
+  }
+
+  function shakeDesk() {
+    deskEl.classList.remove('shake');
+    void deskEl.offsetWidth;
+    deskEl.classList.add('shake');
+  }
+
+  function showStreak(n) {
+    if (n > 0 && n % 10 === 0) {
+      streakMsg.textContent = `${n} shredded — no evidence remains`;
+      streakMsg.classList.add('show');
+      clearTimeout(streakTimer);
+      streakTimer = setTimeout(() => streakMsg.classList.remove('show'), 1500);
+    }
+  }
+
+  function playShredSound() {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      if (!window._shredAudioCtx) window._shredAudioCtx = new Ctx();
+      const ctx = window._shredAudioCtx;
+      if (ctx.state === 'suspended') ctx.resume();
+
+      const now = ctx.currentTime;
+      const duration = 0.5;
+
+      const bufferSize = Math.floor(ctx.sampleRate * duration);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 1800;
+      filter.Q.value = 5;
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, now);
+
+      const pulseCount = 10;
+      for (let i = 0; i < pulseCount; i++) {
+        const t = now + i * 0.045;
+        gain.gain.setValueAtTime(0.001, t);
+        gain.gain.exponentialRampToValueAtTime(0.14, t + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.02, t + 0.04);
+      }
+
+      noise.connect(filter).connect(gain).connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + duration);
+
+      // Soft mechanical clunk at the end
+      const clunkTime = now + duration - 0.03;
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(120, clunkTime);
+      osc.frequency.exponentialRampToValueAtTime(50, clunkTime + 0.08);
+
+      const clunkGain = ctx.createGain();
+      clunkGain.gain.setValueAtTime(0.0001, clunkTime);
+      clunkGain.gain.exponentialRampToValueAtTime(0.13, clunkTime + 0.005);
+      clunkGain.gain.exponentialRampToValueAtTime(0.001, clunkTime + 0.12);
+
+      osc.connect(clunkGain).connect(ctx.destination);
+      osc.start(clunkTime);
+      osc.stop(clunkTime + 0.15);
+    } catch (e) {
+      // Audio unavailable — fail silently, visuals still work
+    }
+  }
+
+  function spawnStrips(size) {
+    const counts = { small: [3, 4], regular: [5, 6], large: [7, 9] };
+    const heightRanges = { small: [26, 20], regular: [40, 30], large: [55, 35] };
+
+    const range = counts[size] || counts.regular;
+    const stripCount = range[0] + Math.floor(Math.random() * (range[1] - range[0] + 1));
+    const hRange = heightRanges[size] || heightRanges.regular;
+    const binWidth = bin.clientWidth || 300;
+
+    for (let i = 0; i < stripCount; i++) {
+      const strip = document.createElement('div');
+      strip.className = 'strip';
+
+      const height = hRange[0] + Math.random() * hRange[1];
+      const left = 15 + Math.random() * (binWidth - 45);
+      const rotate = Math.random() * 40 - 20;
+      const restBottom = Math.random() * 18;
+
+      strip.style.height = height + 'px';
+      strip.style.left = left + 'px';
+
+      bin.appendChild(strip);
+
+      void strip.offsetWidth;
+      strip.classList.add('fall');
+      strip.style.transform = `translateY(0) rotate(${rotate}deg)`;
+      strip.style.bottom = restBottom + 'px';
+
+      setTimeout(() => {
+        strip.classList.add('settled');
+        setTimeout(() => strip.remove(), 700);
+      }, 3200);
+    }
+
+    while (bin.children.length > MAX_STRIPS) {
+      bin.removeChild(bin.firstChild);
+    }
+  }
+
+  function advanceStack() {
+    const remaining = docZone.querySelectorAll('.doc');
+    remaining.forEach(doc => {
+      if (doc.classList.contains('stack-2')) {
+        doc.classList.remove('stack-2');
+        doc.classList.add('current');
+        doc.style.transition = '';
+        doc.style.transform = '';
+        doc.style.opacity = '';
+        attachDragHandlers(doc);
+      } else if (doc.classList.contains('stack-3')) {
+        doc.classList.remove('stack-3');
+        doc.classList.add('stack-2');
+      }
+    });
+
+    docZone.appendChild(makeDoc('stack-3', false));
+  }
+
+  function consumeDoc(doc) {
+    if (isBusy) return;
+    isBusy = true;
+
+    const size = doc.dataset.size || 'regular';
+
+    count++;
+    countEl.textContent = count;
+    showStreak(count);
+    shakeDesk();
+    playShredSound();
+
+    doc.classList.add('consuming');
+    doc.style.transition = 'transform 0.35s cubic-bezier(0.5, 0, 0.6, 1), opacity 0.35s ease 0.15s';
+    doc.style.transform = 'translateX(-50%) translateY(95px) scaleY(0.05)';
+    doc.style.opacity = '0';
+
+    setTimeout(() => spawnStrips(size), 160);
+
+    setTimeout(() => {
+      doc.remove();
+      advanceStack();
+      isBusy = false;
+    }, 400);
+  }
+
+  function attachDragHandlers(doc) {
+    let dragging = false;
+    let startY = 0;
+    let currentY = 0;
+    let baseRotate = 0;
+
+    function onPointerDown(e) {
+      if (isBusy) return;
+      dragging = true;
+      startY = e.clientY;
+      currentY = 0;
+      baseRotate = (Math.random() * 6 - 3);
+      doc.classList.add('dragging');
+      doc.style.transition = 'none';
+      doc.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    }
+
+    function onPointerMove(e) {
+      if (!dragging) return;
+      const deltaY = Math.max(0, e.clientY - startY);
+      currentY = deltaY;
+      const rotate = baseRotate + Math.min(deltaY / 8, 10);
+      doc.style.transform = `translateX(-50%) translateY(${deltaY}px) rotate(${rotate}deg)`;
+
+      if (deltaY >= DRAG_THRESHOLD) {
+        dragging = false;
+        doc.classList.remove('dragging');
+        consumeDoc(doc);
+      }
+    }
+
+    function onPointerUp(e) {
+      if (!dragging) return;
+      dragging = false;
+      doc.classList.remove('dragging');
+
+      if (currentY >= DRAG_THRESHOLD) {
+        consumeDoc(doc);
+      } else {
+        doc.style.transition = 'transform 0.3s cubic-bezier(0.3, 1.4, 0.4, 1)';
+        doc.style.transform = 'translateX(-50%) translateY(0) rotate(0deg)';
+      }
+    }
+
+    doc.addEventListener('pointerdown', onPointerDown);
+    doc.addEventListener('pointermove', onPointerMove);
+    doc.addEventListener('pointerup', onPointerUp);
+    doc.addEventListener('pointercancel', onPointerUp);
+  }
+
+  feedBtn.addEventListener('click', () => {
+    const current = docZone.querySelector('.doc.current');
+    if (current) consumeDoc(current);
+  });
+
+  initPile();
+</script>
+
+</body>
+</html>
